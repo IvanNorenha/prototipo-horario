@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Horarios - NORBYTE</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Generador de Horarios Escolares</h1>
+    </header>
+
+    <main>
+        <!-- 1. CONFIGURACIÓN GLOBAL (Recreos) -->
+        <section id="configuracion-global">
+            <h2>1. Configuración Global</h2>
+            <div class="form-group">
+                <label>Cantidad de Recreos por día (Universal para todo el colegio):</label>
+                <select id="num-recreos" class="select-completo">
+                    <option value="1">1 Recreo (Después de la 4ta hora)</option>
+                    <option value="2">2 Recreos (Después de la 3ra y 6ta hora)</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- 2. REGISTRO DE DOCENTES Y DISPONIBILIDAD -->
+        <section id="registro-docentes">
+            <h2>2. Registro de Docentes y Disponibilidad</h2>
+            <form id="form-docente" class="form-docente-completo">
+                <div class="fila-form">
+                    <input type="text" id="nombre-docente" placeholder="Nombre del Docente" required>
+                    <select id="area-docente" required>
+                        <option value="" disabled selected>Seleccione el Área que domina</option>
+                        <option value="MATEMÁTICA">MATEMÁTICA</option>
+                        <option value="COMUNICACIÓN">COMUNICACIÓN</option>
+                        <option value="INGLÉS">INGLÉS</option>
+                        <option value="ARTE Y CULTURA">ARTE Y CULTURA</option>
+                        <option value="CIENCIAS SOCIALES">CIENCIAS SOCIALES</option>
+                        <option value="DESARROLLO PER. Y CIUD.">DESARROLLO PER. Y CIUD.</option>
+                        <option value="EDUCACIÓN FÍSICA">EDUCACIÓN FÍSICA</option>
+                        <option value="EDUCACIÓN RELIGIOSA">EDUCACIÓN RELIGIOSA</option>
+                        <option value="CIENCIA Y TECNOLOGÍA">CIENCIA Y TECNOLOGÍA</option>
+                        <option value="EDUCACIÓN PARA EL TRABAJO">EDUCACIÓN PARA EL TRABAJO</option>
+                    </select>
+                    <select id="nivel-docente" required>
+                        <option value="" disabled selected>Nivel que dicta</option>
+                        <option value="Todos">Todos los niveles</option>
+                        <option value="Inicial">Solo Inicial</option>
+                        <option value="Primaria">Solo Primaria</option>
+                        <option value="Secundaria">Solo Secundaria</option>
+                        <option value="Inicial,Primaria">Inicial y Primaria</option>
+                        <option value="Primaria,Secundaria">Primaria y Secundaria</option>
+                    </select>
+                    <input type="number" id="horas-max-docente" placeholder="Max hrs/semana (Ej: 30)" required min="1" max="40" style="width: 190px;">
+                </div>
+                
+                <div class="fila-form-dias">
+                    <strong>Días que asiste al colegio:</strong>
+                    <label><input type="checkbox" value="Lunes" class="dia-docente" checked> Lunes</label>
+                    <label><input type="checkbox" value="Martes" class="dia-docente" checked> Martes</label>
+                    <label><input type="checkbox" value="Miércoles" class="dia-docente" checked> Miércoles</label>
+                    <label><input type="checkbox" value="Jueves" class="dia-docente" checked> Jueves</label>
+                    <label><input type="checkbox" value="Viernes" class="dia-docente" checked> Viernes</label>
+                    
+                    <button type="submit" class="btn-agregar" style="margin-left: auto;">+ Registrar Docente</button>
+                </div>
+            </form>
+            <ul id="lista-docentes" style="margin-top: 15px;"></ul>
+        </section>
+
+        <!-- 3. CONFIGURACIÓN DEL PLAN DE ESTUDIOS -->
+        <section id="plan-estudios" style="padding: 0; background: transparent; box-shadow: none;">
+            <div class="top-bar">
+                <div style="width: 100%;">
+                    <h2>3. Configuración del Plan de Estudios por Grado</h2>
+                    <div class="filtros">
+                        <div class="filtro-grupo">
+                            <label>NIVEL</label>
+                            <select id="select-nivel" onchange="actualizarBanner()">
+                                <option value="Inicial">Inicial</option>
+                                <option value="Primaria" selected>Primaria</option>
+                                <option value="Secundaria">Secundaria</option>
+                            </select>
+                        </div>
+                        <div class="filtro-grupo">
+                            <label>GRADO ESCOLAR</label>
+                            <select id="select-grado" onchange="actualizarBanner()">
+                                <option value="1">1ro</option>
+                                <option value="2">2do</option>
+                                <option value="3">3ro</option>
+                                <option value="4">4to</option>
+                                <option value="5">5to</option>
+                                <option value="6">6to</option>
+                            </select>
+                        </div>
+                        <div class="filtro-grupo">
+                            <label>CANT. SECCIONES</label>
+                            <input type="number" id="input-secciones" value="1" min="1" max="15" title="Ej: Si colocas 3, se generarán A, B y C" style="width: 120px;">
+                        </div>
+                        <button id="btn-guardar-plan" class="btn-guardar" onclick="guardarPlanEstudios()" style="margin-left: auto;">
+                            💾 Guardar Plan de este Grado
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="banner-edicion" class="banner-edicion">
+                ⓘ Configurando Plan de Estudios de 1ro Primaria
+            </div>
+
+            <div id="contenedor-areas" class="grid-areas"></div>
+
+            <div id="estado-configuracion" class="estado-panel">
+                <h3>Estado de Configuración (Planes Guardados y Listos)</h3>
+                <ul id="lista-grados-guardados" class="lista-estado">
+                    <li class="sin-datos">Aún no has guardado la configuración de ningún grado.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 4. GENERACIÓN DE HORARIOS -->
+        <section id="acciones">
+            <button id="btn-generar" class="btn-principal">Procesar y Generar Horarios</button>
+        </section>
+
+        <section id="resultado-horario">
+            <div id="contenedor-tablas"></div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
